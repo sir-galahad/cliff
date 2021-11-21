@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use lib "../";
+use lib "./";
 use CLI;
 use CLI::Commands::Command;
 use CLI::Commands::Help;

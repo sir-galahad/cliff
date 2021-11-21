@@ -32,10 +32,37 @@ sub startCLI {
 
 	$self->addCommand( CLI::Commands::DefinableCommand->new($helpCmd));
 	while(<>) {
-		my @args = split(/\s+/,$_);
+		$self->runCommand($_);
+	}
+}
+
+sub addCommand {
+	my $self = shift @_;
+	my $commandObj = shift @_;
+	$self->{commands}->{$commandObj->{name}}=$commandObj;
+}
+
+sub getCommand {
+	my $self = shift @_;
+	my $command = shift @_;
+	return $self->{commands}->{$command};
+}
+
+sub parse {
+	
+	my $self = shift @_;
+	my $command = shift @_;
+	my @args = @_;
+
+}
+
+sub runCommand {
+	my $self = shift @_;
+	chomp($_[0]);
+	my @args = split(/\s+/,$_[0]);
 		my $command = undef;
 		$command = getCommand($self,$args[0]) if (defined ( $args[0] ));
-		if (defined($command)) {
+		if (defined($command) and $command ne '') {
 			shift @args;
 			my %argject; #arg object get it?
 
@@ -69,35 +96,20 @@ ARGLOOP:		foreach my $argParser ( @{$command->{args}}) {
 			};
 			if ($@) {
 				print $@."\n";
+				return -1;
 			} else {
 				if(@args == 0) {
 					$command->command(\%argject);
 				} else {
 					print "Too many arguments for command $command->{name} or \"@args\" didn't match optional arguments\n";
+					return -1;
 				}
 			}
+		} else {
+			print "$args[0]: command not found\n";
+			return -1;
 		}
-	}
-}
-
-sub addCommand {
-	my $self = shift @_;
-	my $commandObj = shift @_;
-	$self->{commands}->{$commandObj->{name}}=$commandObj;
-}
-
-sub getCommand {
-	my $self = shift @_;
-	my $command = shift @_;
-	return $self->{commands}->{$command};
-}
-
-sub parse {
-	
-	my $self = shift @_;
-	my $command = shift @_;
-	my @args = @_;
-
+	return 0;
 }
 
 sub helpCommand {
